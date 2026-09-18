@@ -4,17 +4,14 @@ from services.order_service import get_all_orders, update_order_status
 router = APIRouter()
 
 
-# GET ALL ORDERS
 @router.get("/orders")
 def get_orders():
     orders = get_all_orders()
     return {"orders": orders}
 
 
-# UPDATE ORDER STATUS
 @router.patch("/orders/{order_id}/status")
 def change_order_status(order_id: int, status: str):
-
     allowed_statuses = [
         "Pending",
         "Preparing",

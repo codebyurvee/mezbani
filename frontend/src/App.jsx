@@ -86,113 +86,66 @@ const products = [
 const categories = ["All", "Espresso", "Brewed", "Cold"];
 
 
-/* =========================
-   CUSTOMER WEBSITE
-========================= */
-
 function CustomerHome() {
   const [category, setCategory] = useState("All");
-
   const [cart, setCart] = useState([]);
-
   const [isCartOpen, setIsCartOpen] = useState(false);
-
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const visibleProducts =
     category === "All"
       ? products
-      : products.filter(
-          (product) => product.category === category
-        );
+      : products.filter((product) => product.category === category);
 
-
-  // ADD TO CART
   function addToCart(product) {
     setCart((currentCart) => {
-      const existingProduct = currentCart.find(
-        (item) => item.id === product.id
-      );
+      const existingProduct = currentCart.find((item) => item.id === product.id);
 
       if (existingProduct) {
         return currentCart.map((item) =>
           item.id === product.id
-            ? {
-                ...item,
-                quantity: item.quantity + 1,
-              }
+            ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
 
-      return [
-        ...currentCart,
-        {
-          ...product,
-          quantity: 1,
-        },
-      ];
+      return [...currentCart, { ...product, quantity: 1 }];
     });
 
     setIsCartOpen(true);
   }
 
-
-  // INCREASE QUANTITY
   function increaseQuantity(productId) {
     setCart((currentCart) =>
       currentCart.map((item) =>
         item.id === productId
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
+          ? { ...item, quantity: item.quantity + 1 }
           : item
       )
     );
   }
 
-
-  // DECREASE QUANTITY
   function decreaseQuantity(productId) {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
           item.id === productId
-            ? {
-                ...item,
-                quantity: item.quantity - 1,
-              }
+            ? { ...item, quantity: item.quantity - 1 }
             : item
         )
         .filter((item) => item.quantity > 0)
     );
   }
 
-
-  // REMOVE PRODUCT
   function removeFromCart(productId) {
     setCart((currentCart) =>
       currentCart.filter((item) => item.id !== productId)
     );
   }
 
+  const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-  // TOTAL ITEMS
-  const cartItemCount = cart.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
-
-  // TOTAL PRICE
-  const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-
-
-  // OPEN CHECKOUT
   function openCheckout() {
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
@@ -204,9 +157,7 @@ function CustomerHome() {
         `${API_URL}/send-order-notification-to-owner/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             customer_name: order.customer.name,
             customer_phone: order.customer.phone,
@@ -223,35 +174,22 @@ function CustomerHome() {
       if (!response.ok) {
         throw new Error(data.detail || "Failed to send WhatsApp notification");
       }
-
-      console.log("WHATSAPP NOTIFICATION SENT:", data);
     } catch (error) {
       console.error("WHATSAPP ERROR:", error);
     }
   }
 
-
-  // PLACE ORDER
   async function placeOrder(order) {
     try {
-      const response = await fetch(
-        `${API_URL}/orders`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(order),
-        }
-      );
+      const response = await fetch(`${API_URL}/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(order),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to place order");
       }
-
-      const data = await response.json();
-
-      console.log("SERVER RESPONSE:", data);
 
       await sendOrderConfirmation(order);
 
@@ -259,14 +197,11 @@ function CustomerHome() {
 
       setIsCheckoutOpen(false);
       setCart([]);
-
     } catch (error) {
       console.error("ORDER ERROR:", error);
-
       alert("Something went wrong. Please try again.");
     }
   }
-
 
   return (
     <>
@@ -274,9 +209,7 @@ function CustomerHome() {
 
       <main>
         <Hero />
-
         <Marquee />
-
         <Features />
 
         <Menu
@@ -285,10 +218,7 @@ function CustomerHome() {
           setCategory={setCategory}
         />
 
-        <section
-          className="products"
-          aria-label="Coffee menu"
-        >
+        <section className="products" aria-label="Coffee menu">
           {visibleProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -299,16 +229,12 @@ function CustomerHome() {
         </section>
 
         <Story />
-
         <Location />
-
         <NewsLetter />
       </main>
 
       <Footer />
 
-
-      {/* CART */}
       <Cart
         cart={cart}
         isOpen={isCartOpen}
@@ -320,8 +246,6 @@ function CustomerHome() {
         openCheckout={openCheckout}
       />
 
-
-      {/* CHECKOUT */}
       {isCheckoutOpen && (
         <Checkout
           cart={cart}
@@ -334,30 +258,20 @@ function CustomerHome() {
         />
       )}
 
-
-      {/* FLOATING CART */}
       <button
         className="floating-cart"
         onClick={() => setIsCartOpen(true)}
       >
         🛒
-
-        {cartItemCount > 0 && (
-          <span>{cartItemCount}</span>
-        )}
+        {cartItemCount > 0 && <span>{cartItemCount}</span>}
       </button>
     </>
   );
 }
 
 
-/* =========================
-   ADMIN PROTECTED ROUTE
-========================= */
-
 function ProtectedAdminRoute({ children }) {
-  const isAdminLoggedIn =
-    localStorage.getItem("adminLoggedIn") === "true";
+  const isAdminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
 
   if (!isAdminLoggedIn) {
     return <Navigate to="/admin" replace />;
@@ -367,30 +281,12 @@ function ProtectedAdminRoute({ children }) {
 }
 
 
-/* =========================
-   MAIN APP
-========================= */
-
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* CUSTOMER WEBSITE */}
-        <Route
-          path="/"
-          element={<CustomerHome />}
-        />
-
-
-        {/* ADMIN LOGIN */}
-        <Route
-          path="/admin"
-          element={<AdminLogin />}
-        />
-
-
-        {/* ADMIN DASHBOARD */}
+        <Route path="/" element={<CustomerHome />} />
+        <Route path="/admin" element={<AdminLogin />} />
         <Route
           path="/admin/dashboard"
           element={
@@ -399,14 +295,7 @@ function App() {
             </ProtectedAdminRoute>
           }
         />
-
-
-        {/* UNKNOWN URL */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import json
 import os
-
 import requests
 
 from dotenv import load_dotenv
@@ -15,11 +14,6 @@ from routes.orders import router as orders_router
 
 
 app = FastAPI()
-
-
-# -----------------------------
-# CORS
-# -----------------------------
 
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
@@ -34,33 +28,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# -----------------------------
-# Include Routes
-# -----------------------------
-
 app.include_router(orders_router)
-
-
-# -----------------------------
-# DB path (absolute so it works on any server)
-# -----------------------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "mycafe.db")
 
-
-# -----------------------------
-# Config
-# -----------------------------
-
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID", "1371047999422998")
 OWNER_PHONE     = os.getenv("OWNER_PHONE", "918556899621")
 
-
-# -----------------------------
-# Models
-# -----------------------------
 
 class Customer(BaseModel):
     name: str
@@ -89,18 +64,10 @@ class WhatsAppOwnerNotification(BaseModel):
     address: str
 
 
-# -----------------------------
-# Home
-# -----------------------------
-
 @app.get("/")
 def home():
     return {"message": "Mezbani API is running"}
 
-
-# -----------------------------
-# Create Order
-# -----------------------------
 
 @app.post("/orders")
 def create_order(order: Order):
@@ -134,10 +101,6 @@ def create_order(order: Order):
         "order": order,
     }
 
-
-# -----------------------------
-# Owner Notification (WhatsApp)
-# -----------------------------
 
 @app.post("/send-order-notification-to-owner/")
 def send_owner_notification(order: WhatsAppOwnerNotification):

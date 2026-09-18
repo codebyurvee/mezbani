@@ -20,11 +20,10 @@ CREATE TABLE IF NOT EXISTS orders (
 )
 """)
 
-# Add status column if upgrading an existing DB that doesn't have it yet
 try:
     cursor.execute("ALTER TABLE orders ADD COLUMN status TEXT NOT NULL DEFAULT 'Pending'")
 except Exception:
-    pass  # Column already exists
+    pass
 
 connection.commit()
 connection.close()
